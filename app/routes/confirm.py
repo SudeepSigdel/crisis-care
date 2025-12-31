@@ -10,9 +10,9 @@ from mailjet_rest import Client
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-confirmation_router = APIRouter()
+router = APIRouter()
 
-@confirmation_router.get("/confirm_request/{request_id}/{volunteer_id}")
+@router.get("/confirm_request/{request_id}/{volunteer_id}")
 async def confirm_request(request_id: int, volunteer_id: int, db: SessionLocal):
     logger.info(f"Received volunteer_id: {volunteer_id}")
 

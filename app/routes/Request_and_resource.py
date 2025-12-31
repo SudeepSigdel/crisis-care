@@ -6,7 +6,7 @@ from typing import List, Optional
 from .. import models, schemas, utils, database, oauth2
 from sqlmodel import select
 
-req_router = APIRouter(
+router = APIRouter(
     tags=["Requests and Resources"]
 )
 
@@ -18,7 +18,7 @@ req_router = APIRouter(
 #     print(f"Error loading template: {str(e)}")
 
 # Add a new victim request
-@req_router.post("/requests", response_model=schemas.RequestResponse)
+@router.post("/requests", response_model=schemas.RequestResponse)
 async def add_request(request: schemas.RequestCreate, db: database.SessionLocal, current_user = Depends(oauth2.get_current_user)):
     # Verify user from token
     user = db.exec(select(models.User).where(models.User.email == current_user.email)).first()
@@ -52,12 +52,12 @@ async def add_request(request: schemas.RequestCreate, db: database.SessionLocal,
 
 
 # Get all active victim requests
-@req_router.get("/requests", response_model=List[schemas.RequestResponse])
+@router.get("/requests", response_model=List[schemas.RequestResponse])
 def get_all_requests(db: database.SessionLocal):
     return db.exec(select(models.Request).where(models.Request.is_confirmed == False)).all()
 
 # Add a new resource (donor)
-@req_router.post("/resources", response_model=schemas.ResourceResponse)
+@router.post("/resources", response_model=schemas.ResourceResponse)
 async def add_resource(resource: schemas.ResourceCreate, db: database.SessionLocal, current_user=Depends(oauth2.get_current_user)):
     user = db.exec(select(models.User).filter(models.User.email == current_user.email)).first()
     if not user:
@@ -79,11 +79,11 @@ async def add_resource(resource: schemas.ResourceCreate, db: database.SessionLoc
     return db_resource
 
 # Get all available resources
-@req_router.get("/resources", response_model=List[schemas.ResourceResponse])
+@router.get("/resources", response_model=List[schemas.ResourceResponse])
 def get_all_resources(db: database.SessionLocal):
     return db.exec(select(models.Resource)).all()
 
-@req_router.put("/requests/{request_id}/status")
+@router.put("/requests/{request_id}/status")
 def update_request_status(request_id: int, statuscon: str, db: database.SessionLocal, current_user= Depends(oauth2.get_current_user)):
     user = db.exec(select(models.User).where(models.User.email == current_user.email)).first()
     if not user:
@@ -101,14 +101,14 @@ def update_request_status(request_id: int, statuscon: str, db: database.SessionL
     db.commit()
     return {"message": "Status updated", "new_status": statuscon}
 
-@req_router.get("/requests", response_model=List[schemas.RequestResponse])
+@router.get("/requests", response_model=List[schemas.RequestResponse])
 def get_requests(db: database.SessionLocal, request_type: Optional[str] = None):
     query = db.exec(select(models.Request).where(models.Request.is_confirmed == False))
     if request_type:
         query = db.exec(select(models.Request).where(models.Request.is_confirmed == False, models.Request.request_type == request_type))
     return query.all()
 
-@req_router.get("/resources", response_model=List[schemas.ResourceResponse])
+@router.get("/resources", response_model=List[schemas.ResourceResponse])
 def get_resources(db: database.SessionLocal, resource_type: Optional[str] = None):
     query = db.exec(select(models.Resource))
     if resource_type:
@@ -116,7 +116,7 @@ def get_resources(db: database.SessionLocal, resource_type: Optional[str] = None
     return query.all()
 
 
-@req_router.get("/requests/{request_id}/nearest_resources", response_model=List[schemas.ResourceResponse])
+@router.get("/requests/{request_id}/nearest_resources", response_model=List[schemas.ResourceResponse])
 def get_nearest_resources(db: database.SessionLocal, request_id: int, radius: Optional[float] = 50, resource_type: Optional[str] = None):
     # Get the victim request from the database
     request = db.exec(select(models.Request).where(models.Request.id == request_id)).first()
@@ -142,7 +142,7 @@ def get_nearest_resources(db: database.SessionLocal, request_id: int, radius: Op
     # Only return resources, not the distance
     return [resource for resource, _ in nearby_resources]
 
-@req_router.post("/match/{request_id}")
+@router.post("/match/{request_id}")
 def match_request(request_id: int, background_tasks: BackgroundTasks, db: database.SessionLocal):
     request = db.exec(select(models.Request).where(Request.id == request_id, Request.is_confirmed == False)).first()
     if not request:

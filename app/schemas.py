@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlmodel import SQLModel
 from pydantic import EmailStr
 from typing import Optional
@@ -17,11 +18,6 @@ class UserLogin(SQLModel):
     email: str
     password: str
 
-class UserResponse(UserBase):
-    id: int
-    disabled: bool=False
-    class Config:
-        from_attributes = True
 
 class Token(SQLModel):
     access_token: str
@@ -68,3 +64,12 @@ class MessageSchema(SQLModel):
     message: str
     recipient_email: str
     body: str
+
+class UserOut(SQLModel):
+    firstname: str
+    lastname: str
+    email: EmailStr
+    mobile_number: str
+    role: str
+    created_at: datetime
+    disabled: bool

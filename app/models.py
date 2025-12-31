@@ -5,6 +5,7 @@ from sqlmodel import (
     Column,
     String,
     TIMESTAMP,
+    Boolean,
     func,
 )
 from pydantic import EmailStr
@@ -22,6 +23,10 @@ class User(SQLModel, table=True):
     mobile_number: str
     role: str | None = Field(default="User")  # user | admin | volunteer
     hashed_password: str
+    disabled: bool | None = Field(default=False)
+    created_at: datetime | None = Field(default_factory= datetime.utcnow,
+        sa_column=Column(TIMESTAMP(timezone=True), server_default=func.now())
+    )
 
     requests: List["Request"] = Relationship(
         back_populates="user",

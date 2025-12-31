@@ -1,7 +1,5 @@
 from fastapi import FastAPI
-from .routes.auth import auth_router
-from .routes.Request_and_resource import req_router
-from .routes.confirm import confirmation_router
+from .routes import auth, confirm, Request_and_resource, users
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -17,7 +15,8 @@ app.add_middleware(
 )
 
 
-app.include_router(auth_router)
-app.include_router(req_router)
-app.include_router(confirmation_router)
+app.include_router(auth.router)
+app.include_router(users.router)
+app.include_router(Request_and_resource.router)
+app.include_router(confirm.router)
 
